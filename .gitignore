@@ -147,3 +147,14 @@ vite.config.ts.timestamp-*
 
 # Turbo Repo
 .turbo
+
+# Local WordPress development files
+wp-test/
+.claude/
+.DS_Store
+.env
+.env.*
+!.env.example
+designs-ng-theme/designs-ng-theme
+*.sql
+*.sqlite*

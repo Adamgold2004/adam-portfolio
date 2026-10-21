@@ -1,0 +1,64 @@
+# Paid services and disks. Review Render's estimate before creating this Blueprint.
+services:
+  - type: web
+    name: adam-studio
+    runtime: docker
+    plan: 0.5c-512mb
+    region: frankfurt
+    dockerfilePath: ./Dockerfile
+    autoDeployTrigger: commit
+    healthCheckPath: /
+    disk:
+      name: wordpress-content
+      mountPath: /var/www/html/wp-content
+      sizeGB: 2
+    envVars:
+      - key: WORDPRESS_DB_HOST
+        fromService:
+          name: adam-studio-mysql
+          type: pserv
+          property: host
+      - key: WORDPRESS_DB_NAME
+        value: wordpress
+      - key: WORDPRESS_DB_USER
+        value: wordpress
+      - key: WORDPRESS_DB_PASSWORD
+        fromService:
+          name: adam-studio-mysql
+          type: pserv
+          envVarKey: MYSQL_PASSWORD
+      - key: WORDPRESS_ADMIN_USER
+        value: studio-admin
+      - key: WORDPRESS_ADMIN_EMAIL
+        sync: false
+      - key: WORDPRESS_ADMIN_PASSWORD
+        generateValue: true
+      - key: WORDPRESS_CONFIG_EXTRA
+        value: |
+          $site_url = getenv('WORDPRESS_SITE_URL') ?: getenv('RENDER_EXTERNAL_URL');
+          if ($site_url) {
+              define('WP_HOME', rtrim($site_url, '/'));
+              define('WP_SITEURL', rtrim($site_url, '/'));
+          }
+          define('FORCE_SSL_ADMIN', true);
+          define('DISALLOW_FILE_EDIT', true);
+  - type: pserv
+    name: adam-studio-mysql
+    runtime: image
+    image:
+      url: docker.io/library/mysql:8.4
+    plan: 1c-2g
+    region: frankfurt
+    disk:
+      name: mysql-data
+      mountPath: /var/lib/mysql
+      sizeGB: 5
+    envVars:
+      - key: MYSQL_DATABASE
+        value: wordpress
+      - key: MYSQL_USER
+        value: wordpress
+      - key: MYSQL_PASSWORD
+        generateValue: true
+      - key: MYSQL_ROOT_PASSWORD
+        generateValue: true

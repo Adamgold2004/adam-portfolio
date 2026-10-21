@@ -1,0 +1,8 @@
+**
+!Dockerfile
+!deploy/
+!deploy/**
+!designs-ng-theme/
+!designs-ng-theme/**
+designs-ng-theme/designs-ng-theme
+**/.DS_Store
